@@ -35,6 +35,7 @@ export const obtenerConferencistaPorId = async (req, res) => {
 
 export const actualizarConferencista = async (req, res) => {
 	try {
+		if (req.body.fecha_nacimiento) req.body.fecha_nacimiento = new Date(req.body.fecha_nacimiento);
 		await prisma.conferencista.update({
 			where: { id: +req.params.id },
 			data: req.body,
