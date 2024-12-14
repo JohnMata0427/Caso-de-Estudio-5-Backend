@@ -1,62 +1,62 @@
-import prisma from "../database.js";
+import { prisma } from '../database.js';
 
-export const registrarReserva = async (req, res) => {
-	if (Object.values(req.body).includes(""))
-		return res.status(400).json({ res: "Todos los campos son requeridos" });
+export const registrarReserva = async ({ body }, res) => {
+	if (Object.values(body).includes(''))
+		return res.status(400).json({ res: 'Todos los campos son requeridos' });
 
-	req.body.id_conferencista = +req.body.id_conferencista;
-	req.body.id_auditorio = +req.body.id_auditorio;
+	body.id_conferencista = +body.id_conferencista;
+	body.id_auditorio = +body.id_auditorio;
 
 	const reserva = await prisma.reserva.create({
-		data: req.body,
+		data: body,
 	});
 
-	res.status(201).json({ res: "Reserva registrada correctamente", reserva });
+	res.status(201).json({ res: 'Reserva registrada correctamente', reserva });
 };
 
 export const obtenerReservas = async (_, res) => {
 	res.status(200).json(await prisma.reserva.findMany());
 };
 
-export const obtenerReservaPorId = async (req, res) => {
+export const obtenerReservaPorId = async ({ params: { id } }, res) => {
 	const reserva = await prisma.reserva.findUnique({
-		where: { id: +req.params.id },
+		where: { id: +id },
 		include: {
 			conferencista: true,
 			auditorio: true,
-		}
+		},
 	});
 
 	if (!reserva)
-		return res.status(404).json({ res: "La reserva solicitada no existe" });
+		return res.status(404).json({ res: 'La reserva solicitada no existe' });
 
 	res.status(200).json(reserva);
 };
 
-export const actualizarReserva = async (req, res) => {
+export const actualizarReserva = async ({ params: { id }, body }, res) => {
 	try {
 		const reserva = await prisma.reserva.update({
-			where: { id: +req.params.id },
-			data: req.body,
+			where: { id: +id },
+			data: body,
 		});
 
 		res.status(200).json({
-			res: "Reserva actualizada correctamente",
+			res: 'Reserva actualizada correctamente',
 			reserva,
 		});
 	} catch (error) {
-		res.status(404).json({ res: "La reserva solicitada no existe" });
+		res.status(404).json({ res: 'La reserva solicitada no existe' });
 	}
 };
 
-export const eliminarReserva = async (req, res) => {
+export const eliminarReserva = async ({ params: { id } }, res) => {
 	try {
 		await prisma.reserva.delete({
-			where: { id: +req.params.id },
+			where: { id: +id },
 		});
 
-		res.status(200).json({ res: "Reserva eliminada correctamente" });
+		res.status(200).json({ res: 'Reserva eliminada correctamente' });
 	} catch (error) {
-		res.status(404).json({ res: "La reserva solicitada no existe" });
+		res.status(404).json({ res: 'La reserva solicitada no existe' });
 	}
 };

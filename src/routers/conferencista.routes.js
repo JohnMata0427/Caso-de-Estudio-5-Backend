@@ -1,22 +1,22 @@
-import { Router } from "express";
+import { Router } from 'express';
 import {
 	registrarConferencista,
 	obtenerConferencistas,
 	obtenerConferencistaPorId,
 	actualizarConferencista,
 	eliminarConferencista,
-} from "../controllers/conferencista.controller.js";
-import { validarUsuario } from "../middlewares/auth.middleware.js";
+} from '../controllers/conferencista.controller.js';
+import { validarUsuario } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
 router
-	.route("/conferencistas")
+	.route('/conferencistas')
 	.post(validarUsuario, registrarConferencista)
 	.get(validarUsuario, obtenerConferencistas);
 
 router
-	.route("/conferencista/:id")
+	.route('/conferencista/:id')
 	.get(validarUsuario, obtenerConferencistaPorId)
 	.put(validarUsuario, actualizarConferencista)
 	.delete(validarUsuario, eliminarConferencista);

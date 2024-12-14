@@ -1,54 +1,48 @@
-import prisma from "../database.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { prisma } from '../database.js';
+import { hash, compare, genSalt } from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
-export const registrarUsuario = async (req, res) => {
-	if (Object.values(req.body).includes(""))
-		return res.status(400).json({ res: "Todos los campos son requeridos" });
+export const registrarUsuario = async ({ body }, res) => {
+	if (Object.values(body).includes(''))
+		return res.status(400).json({ res: 'Todos los campos son requeridos' });
 
-	const { email, password } = req.body;
+	const { email, password } = body;
 
-	const emailExistente = await prisma.usuario.findUnique({
-		where: { email },
-	});
+	if (await prisma.usuario.findUnique({ where: { email } }))
+		return res.status(400).json({ res: 'El email ya está registrado' });
 
-	if (emailExistente)
-		return res.status(400).json({ res: "El email ya está registrado" });
-
-	req.body.password = await bcrypt.hash(password, await bcrypt.genSalt(10));
+	body.password = await hash(password, await genSalt(10));
 
 	const usuario = await prisma.usuario.create({
-		data: req.body,
+		data: body,
 	});
 
-	res.status(201).json({ res: "Usuario registrado correctamente", usuario });
+	res.status(201).json({ res: 'Usuario registrado correctamente', usuario });
 };
 
-export const loginUsuario = async (req, res) => {
-	const { email, password } = req.body;
+export const loginUsuario = async ({ body }, res) => {
+	const { email, password } = body;
 
 	const usuario = await prisma.usuario.findUnique({
 		where: { email },
 	});
 
 	if (!usuario)
-		return res.status(404).json({ res: "El email no está registrado" });
+		return res.status(404).json({ res: 'El email no está registrado' });
 
-	const passwordValido = await bcrypt.compare(password, usuario.password);
-
-	if (!passwordValido)
-		return res.status(400).json({ res: "La contraseña es incorrecta" });
+	if (!(await compare(password, usuario.password)))
+		return res.status(400).json({ res: 'La contraseña es incorrecta' });
 
 	const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, {
-		expiresIn: "2h",
+		expiresIn: '2h',
 	});
 
-	res.status(200).json({ res: "Inicio de sesión correcto", token, usuario });
+	res.status(200).json({ res: 'Inicio de sesión correcto', token, usuario });
 };
 
-export const perfilUsuario = async (req, res) => {
-	delete req.usuarioBDD.password;
-	res.status(200).json(req.usuarioBDD);
+export const perfilUsuario = async ({ usuarioBDD }, res) => {
+	delete usuarioBDD.password;
+	res.status(200).json(usuarioBDD);
 };
 
 export const obtenerUsuarios = async (_, res) => {
@@ -59,60 +53,57 @@ export const obtenerUsuarios = async (_, res) => {
 	);
 };
 
-export const obtenerUsuarioPorId = async (req, res) => {
+export const obtenerUsuarioPorId = async ({ params: { id } }, res) => {
 	const usuario = await prisma.usuario.findUnique({
-		where: { id: +req.params.id },
+		where: { id: +id },
 		select: { id: true, nombre: true, apellido: true, email: true },
 	});
 
 	if (!usuario)
-		return res.status(404).json({ res: "El usuario solicitado no existe" });
+		return res.status(404).json({ res: 'El usuario solicitado no existe' });
 
 	res.status(200).json(usuario);
 };
 
-export const actualizarUsuario = async (req, res) => {
+export const actualizarUsuario = async ({ params: { id }, body }, res) => {
 	try {
 		await prisma.usuario.update({
-			where: { id: +req.params.id },
-			data: req.body,
+			where: { id: +id },
+			data: body,
 		});
-		res.status(200).json({ res: "Usuario actualizado correctamente" });
+		res.status(200).json({ res: 'Usuario actualizado correctamente' });
 	} catch (error) {
-		res.status(400).json({ res: "El usuario solicitado no existe" });
+		res.status(400).json({ res: 'El usuario solicitado no existe' });
 	}
 };
 
-export const eliminarUsuario = async (req, res) => {
+export const eliminarUsuario = async ({ params: { id } }, res) => {
 	try {
 		await prisma.usuario.delete({
-			where: { id: +req.params.id },
+			where: { id: +id },
 		});
-		res.status(200).json({ res: "Usuario eliminado correctamente" });
+		res.status(200).json({ res: 'Usuario eliminado correctamente' });
 	} catch (error) {
-		res.status(400).json({ res: "El usuario solicitado no existe" });
+		res.status(400).json({ res: 'El usuario solicitado no existe' });
 	}
 };
 
-export const actualizarContrasena = async (req, res) => {
-	const { password, newPassword } = req.body;
+export const actualizarContrasena = async ({ body, usuarioBDD }, res) => {
+	let { password, newPassword } = body;
 
-	const passwordValido = await bcrypt.compare(
-		password,
-		req.usuarioBDD.password
-	);
+	const passwordValido = await compare(password, usuarioBDD.password);
 
 	if (!passwordValido)
 		return res
 			.status(400)
-			.json({ res: "La contraseña actual es incorrecta" });
+			.json({ res: 'La contraseña actual es incorrecta' });
 
-	password = await bcrypt.hash(newPassword, await bcrypt.genSalt(10));
+	password = await hash(newPassword, await genSalt(10));
 
 	await prisma.usuario.update({
-		where: { id: req.usuarioBDD.id },
+		where: { id: usuarioBDD.id },
 		data: { password },
 	});
 
-	res.status(200).json({ res: "Contraseña actualizada correctamente" });
+	res.status(200).json({ res: 'Contraseña actualizada correctamente' });
 };
