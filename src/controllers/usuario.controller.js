@@ -1,5 +1,5 @@
 import { prisma } from '../database.js';
-import { hash, compare, genSalt } from 'bcryptjs';
+import { hash, compare, genSalt } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 export const registrarUsuario = async ({ body }, res) => {

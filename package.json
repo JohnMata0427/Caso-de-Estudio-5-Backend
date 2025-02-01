@@ -8,14 +8,14 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "node --watch src/index.js",
 		"start": "node src/index.js",
-		"migrate": "prisma migrate dev"
+		"migrate": "prisma migrate dev --name init"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
 		"@prisma/client": "^6.3.0",
-		"bcryptjs": "^2.4.3",
+		"bcrypt": "^5.1.1",
 		"cors": "^2.8.5",
 		"express": "^4.21.2",
 		"jsonwebtoken": "^9.0.2",
