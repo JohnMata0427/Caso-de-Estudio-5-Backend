@@ -4,12 +4,7 @@ export const registrarReserva = async ({ body }, res) => {
 	if (Object.values(body).includes(''))
 		return res.status(400).json({ res: 'Todos los campos son requeridos' });
 
-	body.id_conferencista = +body.id_conferencista;
-	body.id_auditorio = +body.id_auditorio;
-
-	const reserva = await prisma.reserva.create({
-		data: body,
-	});
+	const reserva = await prisma.reserva.create({ data: body });
 
 	res.status(201).json({ res: 'Reserva registrada correctamente', reserva });
 };
@@ -51,9 +46,7 @@ export const actualizarReserva = async ({ params: { id }, body }, res) => {
 
 export const eliminarReserva = async ({ params: { id } }, res) => {
 	try {
-		await prisma.reserva.delete({
-			where: { id: +id },
-		});
+		await prisma.reserva.delete({ where: { id: +id } });
 
 		res.status(200).json({ res: 'Reserva eliminada correctamente' });
 	} catch (error) {

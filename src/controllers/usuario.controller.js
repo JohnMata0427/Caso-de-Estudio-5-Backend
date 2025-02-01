@@ -13,9 +13,7 @@ export const registrarUsuario = async ({ body }, res) => {
 
 	body.password = await hash(password, await genSalt(10));
 
-	const usuario = await prisma.usuario.create({
-		data: body,
-	});
+	const usuario = await prisma.usuario.create({ data: body });
 
 	res.status(201).json({ res: 'Usuario registrado correctamente', usuario });
 };
@@ -23,9 +21,7 @@ export const registrarUsuario = async ({ body }, res) => {
 export const loginUsuario = async ({ body }, res) => {
 	const { email, password } = body;
 
-	const usuario = await prisma.usuario.findUnique({
-		where: { email },
-	});
+	const usuario = await prisma.usuario.findUnique({ where: { email } });
 
 	if (!usuario)
 		return res.status(404).json({ res: 'El email no está registrado' });
@@ -79,9 +75,8 @@ export const actualizarUsuario = async ({ params: { id }, body }, res) => {
 
 export const eliminarUsuario = async ({ params: { id } }, res) => {
 	try {
-		await prisma.usuario.delete({
-			where: { id: +id },
-		});
+		await prisma.usuario.delete({ where: { id: +id } });
+
 		res.status(200).json({ res: 'Usuario eliminado correctamente' });
 	} catch (error) {
 		res.status(400).json({ res: 'El usuario solicitado no existe' });
@@ -91,9 +86,7 @@ export const eliminarUsuario = async ({ params: { id } }, res) => {
 export const actualizarContrasena = async ({ body, usuarioBDD }, res) => {
 	let { password, newPassword } = body;
 
-	const passwordValido = await compare(password, usuarioBDD.password);
-
-	if (!passwordValido)
+	if (!await compare(password, usuarioBDD.password))
 		return res
 			.status(400)
 			.json({ res: 'La contraseña actual es incorrecta' });

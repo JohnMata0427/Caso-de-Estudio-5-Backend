@@ -6,9 +6,7 @@ export const registrarConferencista = async ({ body }, res) => {
 
 	body.fecha_nacimiento = new Date(body.fecha_nacimiento);
 
-	await prisma.conferencista.create({
-		data: body,
-	});
+	await prisma.conferencista.create({ data: body });
 
 	res.status(201).json({ res: 'Conferencista registrado correctamente' });
 };
@@ -55,9 +53,7 @@ export const actualizarConferencista = async (
 
 export const eliminarConferencista = async ({ params: { id } }, res) => {
 	try {
-		await prisma.conferencista.delete({
-			where: { id: +id },
-		});
+		await prisma.conferencista.delete({ where: { id: +id } });
 
 		res.status(200).json({ res: 'Conferencista eliminado correctamente' });
 	} catch (error) {

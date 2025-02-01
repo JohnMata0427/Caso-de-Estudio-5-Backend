@@ -25,6 +25,6 @@ router
 	.put(validarUsuario, actualizarUsuario)
 	.delete(validarUsuario, eliminarUsuario);
 
-router.put('/actualizarpassword', validarUsuario, actualizarContrasena);
+router.put('/actualizar-password', validarUsuario, actualizarContrasena);
 
 export default router;
